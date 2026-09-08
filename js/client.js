@@ -1,4 +1,4 @@
-const socket = io('http://localhost:8000')
+const socket = io('https://chat-application-server-at4k.onrender.com')
 
 const form = document.getElementById("message-form")
 const messageinput = document.getElementById("message-input")
