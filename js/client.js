@@ -127,6 +127,7 @@ form.addEventListener("submit", async (e) => {
         append(`You: ${message}`, 'right', 'message')
         socket.emit('send', message)
         messageinput.value = ""
+        scrolltoend()
     }
 
     if (file) {
@@ -147,8 +148,8 @@ form.addEventListener("submit", async (e) => {
         file = null;
         fileinput.value = "";
         file_img.src = "";
+        scrolltoend()
     }
-    scrolltoend()
 })
 
 
