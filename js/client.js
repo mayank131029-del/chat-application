@@ -1,5 +1,5 @@
-// const socket = io('https://chat-application-server-at4k.onrender.com')
-const socket = io('http://localhost:8000')
+const socket = io('https://chat-application-server-at4k.onrender.com')
+// const socket = io('http://localhost:8000')
 
 const SUPABASE_URL = "https://nmcsuxvojkhspbgkusjw.supabase.co";
 const SUPABASE_KEY = "sb_publishable_WZpMK8mLy33cgVPqPItFHw_dSf3wbX2";
