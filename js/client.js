@@ -64,9 +64,7 @@
         chatelement.classList.add(type)
         chatelement.classList.add(position)
         chatcontainer.append(chatelement)
-        fileelement.addEventListener("load", () => {
         scrolltoend()
-    })
     }
 
     const appendfile = (message, src, position) => {
@@ -159,9 +157,11 @@
     })
 
 
-    socket.on('receive', data => {
-        append(`${data.name}: ${data.message}`, 'left', 'message')
-    })
+   socket.on('receive', data => {
+    console.log("TEXT RECEIVED BY CLIENT:", data);
+
+    append(`${data.name}: ${data.message}`, 'left', 'message');
+});
 
 
     socket.on('leave', (name) => {
