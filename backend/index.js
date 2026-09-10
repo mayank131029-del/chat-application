@@ -18,14 +18,15 @@ let cleanupTimer = null;
 
 io.on('connection', (socket) => {
     socket.on('new-user-joined', username => {
-
+        
         if (cleanupTimer) {
             clearTimeout(cleanupTimer);
             cleanupTimer = null;
             console.log("Cleanup cancelled - user reconnected");
         }
-        users[socket.id] = username;
+        users[socket.id] = username;    
         socket.broadcast.emit('user-joined', username)
+        io.emit('user-joined-to-list', Object.values(users))
     })
 
     socket.on('send', message => {
@@ -43,6 +44,7 @@ io.on('connection', (socket) => {
         const username = users[socket.id];
         socket.broadcast.emit('leave', users[socket.id])
         delete users[socket.id]
+        io.emit('user-joined-to-list', Object.values(users))
 
         if (Object.keys(users).length === 0) {
             console.log("No users connected. Starting 60-second cleanup timer...");
