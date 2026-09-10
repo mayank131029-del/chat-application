@@ -14,6 +14,7 @@ const supabaseAdmin = createClient(
 );
 
 const users = {}
+let cleanupTimer = null;
 
 io.on('connection', (socket) => {
     socket.on('new-user-joined', username => {
@@ -66,7 +67,7 @@ io.on('connection', (socket) => {
 
 
 
-let cleanupTimer = null;
+
 
 async function clearChatImages() {
     console.log("Checking Supabase storage...");
