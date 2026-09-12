@@ -1,5 +1,5 @@
-// const socket = io('https://chat-application-server-at4k.onrender.com')
-const socket = io('http://localhost:8000')
+const socket = io('https://chat-application-server-at4k.onrender.com')
+// const socket = io('http://localhost:8000')
 
 const SUPABASE_URL = "https://nmcsuxvojkhspbgkusjw.supabase.co";
 const SUPABASE_KEY = "sb_publishable_WZpMK8mLy33cgVPqPItFHw_dSf3wbX2";
@@ -20,6 +20,13 @@ const close_preview = document.getElementById("close-preview")
 const userlist = document.querySelector(".active-user-list")
 console.log(userlist)
 var file, imagePath
+
+
+
+messageinput.addEventListener("input", () => {
+    socket.emit('typing')
+    console.log(messageinput.value)
+})
 
 function scrolltoend() {
     chatcontainer.scrollTo(
@@ -86,18 +93,48 @@ const appendfile = (message, src, position) => {
     })
 }
 
+let typingmsg, typingtime
+const appendtypingindicator = (username) => {
+    clearTimeout(typingtime)
+
+    if (!typingmsg) {
+        typingmsg = document.createElement("div")
+        typingmsg.classList.add("typingind")
+        typingmsg.innerText = `${username} is typing ...`
+        chatcontainer.append(typingmsg)
+    }
+
+
+    typingtime = setTimeout(() => {
+        if (typingmsg) {
+            typingmsg.remove()
+            typingmsg = null
+        }
+    }, 1000);
+
+}
+
 
 
 const username = prompt("Enter your Name to Join") || "Guest"
+const room = prompt("Enter Room Name: ")
+function changeRoom() {
+    const newRoom = prompt("Enter new room name");
+
+    if (newRoom) {
+        socket.emit('join-room', newRoom);
+    }
+}
 navuser.innerText = username
 
+socket.emit('join-room', room)
 socket.emit('new-user-joined', username)
 
 socket.on('user-joined', name => {
     append(`${name} joined the chat`, 'center', 'info')
 })
 
-socket.on('user-joined-to-list', data => {
+socket.on('room-users-update', data => {
 
     userlist.innerHTML = ""
 
@@ -147,7 +184,7 @@ form.addEventListener("submit", async (e) => {
         append(`You: ${message}`, 'right', 'message')
         socket.emit('send', message)
         messageinput.value = ""
-
+        scrolltoend()
     }
 
     if (file) {
@@ -160,9 +197,8 @@ form.addEventListener("submit", async (e) => {
         if (imageUrl) {
             appendfile("You:", imageUrl, "right");
 
-            console.log("Sending URL through socket:", imageUrl);
-
             socket.emit("file-send", imageUrl);
+            scrolltoend()
         }
 
         file = null;
@@ -175,18 +211,25 @@ form.addEventListener("submit", async (e) => {
 
 socket.on('receive', data => {
     append(`${data.name}: ${data.message}`, 'left', 'message')
+    scrolltoend()
 })
 
 
 socket.on('leave', (name) => {
     append(`${name} leave the chat`, 'center', 'info')
+    scrolltoend()
 })
 
 
 socket.on('file-receive', (data) => {
-
     appendfile(`${data.name}:`, data.src, 'left');
+    scrolltoend()
 });
+
+socket.on('typing', username => {
+    appendtypingindicator(username)
+    scrolltoend()
+})
 
 
 

@@ -28,7 +28,8 @@
     align-items: start;
     gap: 20px;
 }
-.active-user-list{
+
+.active-user-list {
     max-height: 400px;
     overflow-y: auto;
     display: flex;
@@ -39,12 +40,15 @@
     background-color: black;
     border-radius: 12px;
 }
-.active-user-name:hover{
+
+.active-user-name:hover {
     border-left: 4px solid rgb(1, 211, 1);
 }
-#active-user-number{
+
+#active-user-number {
     /* position: fixed      ; */
 }
+
 .active-user-list::-webkit-scrollbar {
     width: 4px;
 }
@@ -61,7 +65,8 @@
 .active-user-list::-webkit-scrollbar-thumb:hover {
     background: rgb(1, 211, 1);
 }
-.active-user-name{
+
+.active-user-name {
     cursor: pointer;
     border-left: 4px solid rgba(1, 211, 1, 0);
     transition: 0.2s all ease;
@@ -264,6 +269,21 @@ form input {
     border-radius: 50px;
 }
 
+.left {
+    background: rgb(217, 250, 217);
+    align-self: flex-start;
+}
+
+.typingind {
+    align-self: flex-start;
+    padding: 5px 15px;
+    background: gray;
+    color: white;
+    font-size: 13px;
+    border-radius: 50px;
+
+}
+
 .center {
     align-self: center;
 }
@@ -273,10 +293,6 @@ form input {
     background: rgb(217, 217, 250);
 }
 
-.left {
-    background: rgb(217, 250, 217);
-    align-self: flex-start;
-}
 
 .navbar {
     width: 100%;

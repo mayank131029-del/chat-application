@@ -14,37 +14,54 @@ const supabaseAdmin = createClient(
 );
 
 const users = {}
+const rooms = {}
 let cleanupTimer = null;
 
 io.on('connection', (socket) => {
     socket.on('new-user-joined', username => {
-        
         if (cleanupTimer) {
             clearTimeout(cleanupTimer);
             cleanupTimer = null;
             console.log("Cleanup cancelled - user reconnected");
         }
-        users[socket.id] = username;    
-        socket.broadcast.emit('user-joined', username)
-        io.emit('user-joined-to-list', Object.values(users))
+
+        room = rooms[socket.id]
+        users[socket.id] = username;
+        // socket.broadcast.emit('user-joined', username)
+        socket.to(room).emit('user-joined', username)
+        const roomUsers = Object.keys(users)
+            .filter(socketId => rooms[socketId] === room)
+            .map(socketId => users[socketId]);
+        io.to(room).emit('room-users-update', roomUsers)
+        console.log(roomUsers)
+        // socket.io(room).emit('user-joined-to-list', object.values(users))
+
     })
 
     socket.on('send', message => {
-        console.log("TEXT RECEIVED:", message);
-        console.log("SENDER:", users[socket.id]);
+        const room = rooms[socket.id]
 
-        socket.broadcast.emit('receive', {
+        socket.to(room).emit('receive', {
             message: message,
             name: users[socket.id]
-        });
+        })
+
     });
 
     socket.on('disconnect', () => {
 
         const username = users[socket.id];
-        socket.broadcast.emit('leave', users[socket.id])
+        const room = rooms[socket.id]
+
+        socket.to(room).emit('leave', username)
+
+
         delete users[socket.id]
-        io.emit('user-joined-to-list', Object.values(users))
+        const roomUsers = Object.keys(users)
+            .filter(socketId => rooms[socketId] === room)
+            .map(socketId => users[socketId]);
+        io.to(room).emit('room-users-update', roomUsers)
+        delete rooms[socket.id]
 
         if (Object.keys(users).length === 0) {
             console.log("No users connected. Starting 60-second cleanup timer...");
@@ -69,11 +86,44 @@ io.on('connection', (socket) => {
         socket.broadcast.emit('file-receive', { src: src, name: users[socket.id] })
 
     })
+
+    socket.on('join-room', room => {
+        const username = users[socket.id]
+        const oldroom = rooms[socket.id]
+
+        socket.to(oldroom).emit('leave', username)
+
+        socket.leave(oldroom)
+        socket.join(room)
+        rooms[socket.id] = room
+
+        socket.to(room).emit('user-joined', username)
+
+        const oldroomusers = Object.keys(users)
+            .filter(socketId => rooms[socketId] === oldroom)
+            .map(socketId => users[socketId]);
+
+
+        const roomUsers = Object.keys(users)
+            .filter(socketId => rooms[socketId] === room)
+            .map(socketId => users[socketId]);
+        io.to(room).emit('room-users-update', roomUsers)
+
+        if (oldroom) {
+            io.to(oldroom).emit('room-users-update', oldroomusers)
+        }
+
+    })
+
+    socket.on('typing', ()=>{
+        const room = rooms[socket.id]
+        const username = users[socket.id]
+
+        socket.to(room).emit('typing', username)
+
+    })
+
 })
-
-
-
-
 
 
 
@@ -108,5 +158,10 @@ async function clearChatImages() {
         return;
     }
 
-    console.log(`Deleted ${files.length} image(s) from storage.`);
+
 }
+
+
+
+
+
